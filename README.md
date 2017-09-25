@@ -24,8 +24,8 @@ Receive from the server with a successful connection to it.
 
 ```javascript
 {
-	video: "fixz1md",
-	time: 512,
+	video: "VIDEO_ID",
+	time: 123,
 	play: true,
 	light: false
 }
@@ -36,7 +36,7 @@ Receive from the server with a successful connection to it.
 **Light** - is Boolean value of player light on (true) or off (false)
 
 ## <br>Event ``join`` from server
-Receive from the server on new user connected to player.
+Receive from the server if new user connected to player.
 
 #### Response data:
 
@@ -130,6 +130,8 @@ Receive from the server, if any user click change light button.
 ```
 
 **Light** - is Boolean value of player light on (true) or off (false)
+- True - white mode of player.
+- False - dark mode of player.
 
 
 <br><br><br><br>
@@ -150,6 +152,8 @@ Send to the server with a successful connection to it.
 }
 ```
 
+If server receive this event, he emit ["join" event](#event-join-from-server) to all users
+
 ## <br>Event ``play`` to server
 Send to the server what user click play video button.
 
@@ -163,7 +167,7 @@ Send to the server what user click pause video button.
 If server receive this event, he emit ["pause" event](#event-pause-from-server) to all users
 
 ## <br>Event ``load`` to server
-Send to the server new video.
+Send to the server new video link.
 
 #### Input data:
 
@@ -199,12 +203,12 @@ Send new message to the server.
 
 ```javascript
 {
-	nick: "NICKNAME",
 	text: "MESSAGE_TEXT",
 	color: "#HEX"
 }
 ```
 
+Message text can not exceed **150 characters**<br>
 If server receive this event, he emit ["message" event](#event-message-from-server) to all users
 
 ## <br>Event ``light`` to server
