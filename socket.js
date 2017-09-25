@@ -32,7 +32,7 @@ io.sockets.on("connection", function(socket) {
 		var nick = data.nick;
 		users[socket.id] = nick;
 		console.log(`>> Connect\tNick: ${nick} \tIP: ${user_ip}`.cyan);
-		io.sockets.emit("join", {nick, type: "join", id: socket.id});
+		io.sockets.emit("join", {nick, type: "join"});
 		socket.emit("playlist", playlist);
 	});
 
@@ -176,7 +176,7 @@ io.sockets.on("connection", function(socket) {
 		var nick = users[socket.id];
 		console.log(("<< Disconnect\tNick: " + nick).red);
 		delete users[socket.id];
-		io.sockets.emit("disc", {nick, type: "disc", id: socket.id});
+		io.sockets.emit("disc", {nick, type: "disc"});
 	});
 
 	socket.on("*", function(event, data){
