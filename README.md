@@ -31,9 +31,9 @@ Receive from the server with a successful connection to it.
 }
 ```
 
-**Time** - is Integer value of video current time play in **seconds**<br>
-**Play** - is Boolean value of video playing status<br>
-**Light** - is Boolean value of player light on (true) or off (false)
+**time** - is Integer value of video current time play in **seconds**<br>
+**play** - is Boolean value of video playing status<br>
+**light** - is Boolean value of player light on (true) or off (false)
 
 ## <br>Event ``join`` from server
 Receive from the server if new user connected to player.
@@ -101,7 +101,7 @@ Receive from the server if any user rewind video.
 
 ```javascript
 {
-	second: 123,
+	time: 123,
 	nick: "NICK_WHO_REWIND_VIDEO"
 }
 ```
@@ -190,7 +190,7 @@ Send to the server time in seconds to rewind video.
 
 ```javascript
 {
-	second: 123
+	time: 123
 }
 ```
 

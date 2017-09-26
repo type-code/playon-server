@@ -72,11 +72,11 @@ io.sockets.on("connection", function(socket) {
 	});
 
 	socket.on("rewind", function(data){
-		var second = Math.floor(data.second);
+		var second = Math.floor(data.time);
 		var nick = users[socket.id];
 
 		time = second;
-		io.sockets.emit("rewind", {second, nick, type: "rewind"});
+		io.sockets.emit("rewind", {time, nick, type: "rewind"});
 	});
 
 	socket.on("rename", function(data){
@@ -91,8 +91,8 @@ io.sockets.on("connection", function(socket) {
 	});
 
 	socket.on("message", function(data){
-		io.sockets.emit("message", data);
 		data.nick = users[socket.id];
+		io.sockets.emit("message", data);
 
 		if (data.text.substr(0, 1) == "/") {
 			var back = {nick: "SERVER", text: ""};
@@ -175,8 +175,8 @@ io.sockets.on("connection", function(socket) {
 
 	socket.on("disconnect", function(){
 		var nick = users[socket.id];
-		console.log(("<< Disconnect\tNick: " + nick).red);
 		delete users[socket.id];
+		console.log(("<< Disconnect\tNick: " + nick).red);
 		io.sockets.emit("disc", {nick, type: "disc"});
 	});
 
