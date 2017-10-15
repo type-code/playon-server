@@ -12,6 +12,8 @@ var play = false;
 var users = {};
 var playlist = {};
 
+var jokes = require("./jokes.json") || {};
+
 
 console.log("Server Started! [8080]".green);
 
@@ -60,9 +62,16 @@ io.sockets.on("connection", function(socket) {
 
 		if (data.playlist == false) {
 			var temp = url.parse(video_id, true);
-			video_id = temp.query.v;
+			
+			if (temp.query.length) {
+				video_id = temp.query.v;
+			}
+			else {
+				video_id = temp.path.slice(1);
+			}
 		}
 
+		video_id = video_id.replace("https://youtu.be/", "");
 		video = video_id;
 		play = false;
 		time = 0;
@@ -133,8 +142,6 @@ io.sockets.on("connection", function(socket) {
 					io.sockets.emit("playlist", playlist);
 				});
 
-				
-
 				back.text = `Video added to playlist!`;
 				notExist = false;
 			}
@@ -143,8 +150,62 @@ io.sockets.on("connection", function(socket) {
 				back.text += "<li><b>/users</b> - get online users";
 				back.text += "<li><b>/playlist <i>VIDEO</i></b> - add to playlist";
 				back.text += "<li><b>/link</b> - get video link";
+				back.text += "<li><b>/joke all</b> - get jokes list";
+				back.text += "<li><b>/joke show <i>USER</i></b> - get user jokes";
+				back.text += "<li><b>/joke + <i>USER</i></b> - add user jokes";
+				back.text += "<li><b>/joke - <i>USER</i></b> - remove user jokes";
 				back.text += "<li><b>/help</b> - get help";
 				back.text += "</ul>";
+				notExist = false;
+			}
+			if (inString("/joke", command)) {
+				var temp = command.split(" ");
+				var operation = temp[1];
+				var nick = temp[2];
+
+				if (operation == "+") {
+					if (!jokes[nick]) jokes[nick] = 1;
+					else jokes[nick]++;
+
+					var count = jokes[nick];
+					back.text = `Joke added! Jokes by <b>${nick}: ${count}</b>`;
+
+					var json = JSON.stringify(jokes);
+					fs.writeFile("jokes.json", json , "utf8");
+				}
+
+				if (operation == "-") {
+					if (!jokes[nick]) jokes[nick] = 0;
+					else if (jokes[nick] > 0) {jokes[nick]--;}
+					else {delete jokes[nick];}
+
+					var count = jokes[nick];
+					back.text = `Joke remove! Jokes by <b>${nick}: ${count}</b>`;
+
+					var json = JSON.stringify(jokes);
+					fs.writeFile("jokes.json", json , "utf8");
+				}
+
+				if (operation == "show") {
+					var count = jokes[nick];
+					if (!count) count = 0;
+					back.text = `Jokes by ${nick}: <b>${count}</b>`;
+				}
+
+				if (operation == "all") {
+					back.text  = "Jokes count:<ul>";
+					for(var a in jokes) {
+						var user = a;
+						var count = jokes[a];
+						back.text += `<li><b>${user}</b> - ${count} jokes`;
+					}
+					back.text += "</ul>";
+				}
+
+				if (!operation) {
+					back.text = "Invalid parameters! Check /help";
+				}
+
 				notExist = false;
 			}
 			if (inString("/kick", command) && (data.nick == "CHROM" || data.nick == "Meepo")) {

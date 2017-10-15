@@ -77,7 +77,7 @@ Receive from the server if any user press pause.
 
 ```javascript
 {
-	time: 512,
+	time: 123,
 	nick: "NICK_WHO_PRESS_PAUSE"
 }
 ```
@@ -130,8 +130,8 @@ Receive from the server, if any user click change light button.
 ```
 
 **Light** - is Boolean value of player light on (true) or off (false)
-- True - white mode of player.
-- False - dark mode of player.
+- true - white mode of player.
+- false - dark mode of player.
 
 
 <br><br><br><br>
