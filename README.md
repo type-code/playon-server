@@ -147,6 +147,7 @@ Receive from the server, if any user click on video.
 ```
 
 **x** and **y** - is percent value (0 - 100)
+**color** - user main color and mark color
 
 
 <br><br><br><br>
@@ -244,5 +245,6 @@ Send to the server, if user click on video.
 }
 ```
 
-**x** and **y** - is percent value (0 - 100)
-**color** - it's user main color
+**x** and **y** - is percent value (0 - 100)<br>
+**color** - user main color and mark color<br>
+If server receive this event, he emit ["click" event](#event-click-from-server) to all users
