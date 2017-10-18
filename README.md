@@ -12,6 +12,7 @@ The connection to the server takes place using the multi-platform library **Sock
 - [Rewind](#event-rewind-to-server) - User rewind current video to new time
 - [Message](#event-message-to-server) - User send chat message
 - [Light](#event-light-to-server) - User change light on player
+- [Click](#event-click-to-server) - User click on video
 
 # <br><br>Events from server:
 
@@ -129,9 +130,23 @@ Receive from the server, if any user click change light button.
 }
 ```
 
-**Light** - is Boolean value of player light on (true) or off (false)
+**light** - is Boolean value of player light on (true) or off (false)
 - true - white mode of player.
 - false - dark mode of player.
+
+## <br>Event ``click`` from server
+Receive from the server, if any user click on video.
+
+#### Receive data: 
+```javascript
+{
+	x: 123,
+	y: 123,
+	color: "#HEX"
+}
+```
+
+**x** and **y** - is percent value (0 - 100)
 
 
 <br><br><br><br>
@@ -216,3 +231,18 @@ Send to server if user want change light.
 
 #### Input data: `empty`
 If server receive this event, he emit ["light" event](#event-light-from-server) to all users
+
+## <br>Event ``click`` to server
+Send to the server, if user click on video.
+
+#### Input data: 
+```javascript
+{
+	x: 123,
+	y: 123,
+	color: "#HEX"
+}
+```
+
+**x** and **y** - is percent value (0 - 100)
+**color** - it's user main color

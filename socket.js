@@ -32,6 +32,7 @@ io.sockets.on("connection", function(socket) {
 
 	socket.on("join", function(data){
 		var nick = data.nick;
+		socket.nick = nick;
 		users[socket.id] = nick;
 		console.log(`>> Connect\tNick: ${nick} \tIP: ${user_ip}`.cyan);
 		io.sockets.emit("join", {nick, type: "join"});
@@ -40,7 +41,7 @@ io.sockets.on("connection", function(socket) {
 
 	socket.on("play", function(){
 		if (play == false) {
-			var nick = users[socket.id];
+			var nick = socket.nick;
 			console.log("## Play \tTime: " + time);
 			io.sockets.emit("play", {video, time, nick});
 			play = true;
@@ -49,7 +50,7 @@ io.sockets.on("connection", function(socket) {
 
 	socket.on("pause", function(){
 		if (play == true) {
-			var nick = users[socket.id];
+			var nick = socket.nick;
 			console.log(`## Pause\tTime: ${time}\tNick: ${nick}`);
 			io.sockets.emit("pause", {time, nick});
 			play = false;
@@ -58,12 +59,12 @@ io.sockets.on("connection", function(socket) {
 
 	socket.on("load", function(data){
 		var video_id = data.link;
-		var nick = users[socket.id];
+		var nick = socket.nick;
 
 		if (data.playlist == false) {
 			var temp = url.parse(video_id, true);
 			
-			if (temp.query.length) {
+			if (temp.query.v) {
 				video_id = temp.query.v;
 			}
 			else {
@@ -82,7 +83,7 @@ io.sockets.on("connection", function(socket) {
 
 	socket.on("rewind", function(data){
 		var second = Math.floor(data.time);
-		var nick = users[socket.id];
+		var nick = socket.nick;
 
 		time = second;
 		io.sockets.emit("rewind", {time, nick, type: "rewind"});
@@ -90,7 +91,7 @@ io.sockets.on("connection", function(socket) {
 
 	socket.on("rename", function(data){
 		data.type = "rename";
-		users[socket.id] = data.new_nick;
+		socket.nick = data.new_nick;
 		io.sockets.emit("rename", data);
 	});
 
@@ -99,8 +100,17 @@ io.sockets.on("connection", function(socket) {
 		io.sockets.emit("playlist", playlist);
 	});
 
+	socket.on("message_image", function(data){
+		data.nick = socket.nick;
+		io.sockets.emit("message_image", data);
+	});
+
+	socket.on("click", function(data){
+		io.sockets.emit("click", data);
+	});
+
 	socket.on("message", function(data){
-		data.nick = users[socket.id];
+		data.nick = socket.nick;
 		io.sockets.emit("message", data);
 
 		if (data.text.substr(0, 1) == "/") {
@@ -128,7 +138,7 @@ io.sockets.on("connection", function(socket) {
 
 				var api_link = `https://www.youtube.com/watch?v=${video_id}`;
 				var api_request = `https://www.youtube.com/oembed?url=${api_link}&format=json`;
-				var user = users[socket.id];
+				var user = socket.nick;
 
 				request.get({
 					url: api_request,
@@ -235,7 +245,7 @@ io.sockets.on("connection", function(socket) {
 	});
 
 	socket.on("disconnect", function(){
-		var nick = users[socket.id];
+		var nick = socket.nick;
 		delete users[socket.id];
 		console.log(("<< Disconnect\tNick: " + nick).red);
 		io.sockets.emit("disc", {nick, type: "disc"});
