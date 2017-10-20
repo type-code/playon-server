@@ -58,6 +58,18 @@ Receive from the server on user disconnect.
 }
 ```
 
+## <br>Event ``sync`` from server
+Receive from the server info about video play, every 2 min.
+
+#### Response data:
+
+```javascript
+{
+	video: "VIDEO_ID",
+	time: 123
+}
+```
+
 ## <br>Event ``play`` from server
 Receive from the server if any user press play.
 
@@ -146,7 +158,7 @@ Receive from the server, if any user click on video.
 }
 ```
 
-**x** and **y** - is percent value (0 - 100)
+**x** and **y** - is percent value (0 - 100)<br>
 **color** - user main color and mark color
 
 

@@ -262,9 +262,15 @@ setInterval(function(){
 	if (play == true) {
 		time = (time + 0.1);
 		time = Math.floor(time.toFixed(1) * 10) / 10;
-		if ((time % 60) == 0)
-		console.log(("   Time: " + time + "\tID: " + video).gray);
 
+		if ((time % 60) == 0) {
+			console.log(("   Time: " + time + "\tID: " + video).gray);
+
+			if ((time % 120) == 0) {
+				io.sockets.emit("sync", {video, time});
+			}
+		}
+		
 
 		/////////////////////////////////
 		auto_stop += 1;
