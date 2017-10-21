@@ -4,6 +4,21 @@ The server is written on the NodeJS engine in the Javascipt language.
 
 The connection to the server takes place using the multi-platform library **Socket.io**, which was built on the **WebSocket** technology.
 
+
+## Server-side eventlist:
+- [Connect](#event-connect-from-server) - User connect to server
+- [Join](#event-join-from-server) - Any user join to player
+- [Disc](#event-disc-from-server) - Any user disconnect from server
+- [Sync](#event-sync-from-server) - Server synchronize event
+- [Play](#event-play-from-server) - Any user play video
+- [Pause](#event-pause-from-server) - Any user pause video
+- [Load](#event-load-from-server) - Any user load new video link
+- [Rewind](#event-rewind-from-server) - Any user rewind video to new time
+- [Message](#event-message-from-server) - Any user send chat message
+- [Light](#event-light-from-server) - Any user change light on player
+- [Click](#event-click-from-server) - Any user click on video
+
+
 ## Client-side eventlist:
 - [Join](#event-join-to-server) - User join to player
 - [Play](#event-play-to-server) - User play video
