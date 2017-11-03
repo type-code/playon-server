@@ -1,16 +1,25 @@
 {
-  "name": "server",
+  "name": "patyplay-socket",
   "version": "1.0.0",
-  "description": "",
+  "description": "PatyPlay - Socket.io Server",
   "main": "socket.js",
   "scripts": {
-    "run": "clear && node socket.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node socket.js",
+    "run": "cls & node socket.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/type-code/playon-server.git"
   },
   "author": "CHROM",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/type-code/playon-server/issues"
+  },
+  "homepage": "https://github.com/type-code/playon-server#readme",
   "dependencies": {
     "colors": "^1.1.2",
+    "htmlspecialchars": "^1.0.5",
     "request": "^2.81.0",
     "socket.io": "^1.7.2",
     "socketio-wildcard": "^0.3.0"

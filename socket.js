@@ -1,6 +1,7 @@
 var io = require("socket.io")(8080);
 var colors = require("colors");
 var middleware = require("socketio-wildcard")();
+var html = require('htmlspecialchars');
 var request = require("request");
 var url = require("url");
 var fs = require("fs");
@@ -25,17 +26,37 @@ console.log("Server Started! [8080]".green);
 
 
 io.use(middleware);
+
 io.sockets.on("connection", function(socket) {
 
 	var user_ip = socket.conn.remoteAddress.replace("::ffff:", "");
+	var room = "default";
+
 	socket.emit("connected", {video, time, play, light});
 
+	socket.on("room", function(data) {
+		var old_room = room;
+		var new_room = data.room;
+
+		room = new_room;
+		socket.leave(old_room);
+		socket.join(new_room);
+		io.sockets.in(old_room).emit("disc", {nick: socket.nick, type: "disc"});
+		io.sockets.in(new_room).emit("join", {nick: socket.nick, type: "join"});
+		console.log(`>> ${socket.nick} joined to ${room}`.cyan);
+	});
+
 	socket.on("join", function(data){
-		var nick = data.nick;
+		var nick = check_nick(data.nick);
 		socket.nick = nick;
 		users[socket.id] = nick;
+
+		room = "default";
+		socket.room = room;
+		socket.join(room);
+
 		console.log(`>> Connect\tNick: ${nick} \tIP: ${user_ip}`.cyan);
-		io.sockets.emit("join", {nick, type: "join"});
+		io.sockets.in(room).emit("join", {nick, type: "join"});
 		socket.emit("playlist", playlist);
 	});
 
@@ -43,7 +64,7 @@ io.sockets.on("connection", function(socket) {
 		if (play == false) {
 			var nick = socket.nick;
 			console.log("## Play \tTime: " + time);
-			io.sockets.emit("play", {video, time, nick});
+			io.sockets.in(room).emit("play", {video, time, nick});
 			play = true;
 		}
 	});
@@ -52,7 +73,7 @@ io.sockets.on("connection", function(socket) {
 		if (play == true) {
 			var nick = socket.nick;
 			console.log(`## Pause\tTime: ${time}\tNick: ${nick}`);
-			io.sockets.emit("pause", {time, nick});
+			io.sockets.in(room).emit("pause", {time, nick});
 			play = false;
 		}
 	});
@@ -78,7 +99,7 @@ io.sockets.on("connection", function(socket) {
 		time = 0;
 
 		console.log(`## New Video\tID: ${video}`.magenta);
-		io.sockets.emit("load", {video, nick});
+		io.sockets.in(room).emit("load", {video, nick});
 	});
 
 	socket.on("rewind", function(data){
@@ -86,32 +107,34 @@ io.sockets.on("connection", function(socket) {
 		var nick = socket.nick;
 
 		time = second;
-		io.sockets.emit("rewind", {time, nick, type: "rewind"});
+		io.sockets.in(room).emit("rewind", {time, nick, type: "rewind"});
 	});
 
 	socket.on("rename", function(data){
 		data.type = "rename";
+		data.new_nick = check_nick(data.new_nick);
 		socket.nick = data.new_nick;
-		io.sockets.emit("rename", data);
+		io.sockets.in(room).emit("rename", data);
 	});
 
 	socket.on("playlist_delete", function(data){
 		delete playlist[data.id];
-		io.sockets.emit("playlist", playlist);
+		io.sockets.in(room).emit("playlist", playlist);
 	});
 
 	socket.on("message_image", function(data){
 		data.nick = socket.nick;
-		io.sockets.emit("message_image", data);
+		io.sockets.in(room).emit("message_image", data);
 	});
 
 	socket.on("click", function(data){
-		io.sockets.emit("click", data);
+		io.sockets.in(room).emit("click", data);
 	});
 
 	socket.on("message", function(data){
 		data.nick = socket.nick;
-		io.sockets.emit("message", data);
+		data.text = html(data.text);
+		io.sockets.in(room).emit("message", data);
 
 		if (data.text.substr(0, 1) == "/") {
 			var back = {nick: "SERVER", text: ""};
@@ -149,7 +172,7 @@ io.sockets.on("connection", function(socket) {
 					var json = JSON.stringify(playlist);
 					fs.writeFile("playlist.json", json , "utf8");
 					console.log(`## Playlist\tID: ${video_id}\tUser: ${user}`.cyan);
-					io.sockets.emit("playlist", playlist);
+					io.sockets.in(room).emit("playlist", playlist);
 				});
 
 				back.text = `Video added to playlist!`;
@@ -221,14 +244,14 @@ io.sockets.on("connection", function(socket) {
 			if (inString("/kick", command) && (data.nick == "CHROM" || data.nick == "Meepo")) {
 				var user = command.substr(6);
 				back.text  = user + " kicked!";
-				io.sockets.emit("kick", {user: user})
+				io.sockets.in(room).emit("kick", {user: user})
 				notExist = false;
 			}
 			if (notExist) {
 				back.text = `Command ${command} not found. Write /help to get commands list.`;
 			}
 
-			io.sockets.emit("message", back);
+			io.sockets.in(room).emit("message", back);
 		}
 		else {
 			console.log(`@@ Message\tNick: ${data.nick}\tMessage: `.yellow + `${data.text}`.white);
@@ -241,14 +264,14 @@ io.sockets.on("connection", function(socket) {
 
 	socket.on("light", function(){
 		light = !light;
-		io.sockets.emit("light", {light});
+		io.sockets.in(room).emit("light", {light});
 	});
 
 	socket.on("disconnect", function(){
 		var nick = socket.nick;
 		delete users[socket.id];
 		console.log(("<< Disconnect\tNick: " + nick).red);
-		io.sockets.emit("disc", {nick, type: "disc"});
+		io.sockets.in(room).emit("disc", {nick, type: "disc"});
 	});
 
 	socket.on("*", function(event, data){
@@ -289,4 +312,12 @@ setInterval(function(){
 function inString(have, string) {
 	if (string.indexOf(have) == -1) return false;
 	else return true;
+}
+
+
+function check_nick(nick) {
+	if (nick.length > 11) nick = nick.substr(0, 11);
+	nick = html(nick);
+
+	return nick;
 }
