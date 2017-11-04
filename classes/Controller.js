@@ -1,3 +1,5 @@
+const htmlspecialchars = require("htmlspecialchars");
+
 class Controller {
 	constructor() {
 
@@ -26,6 +28,10 @@ class Controller {
 
 	zeroAdd(numb) {
 		return (numb > 9 ? numb : "0" + numb);
+	}
+
+	html(text) {
+		return htmlspecialchars(text);
 	}
 }
 

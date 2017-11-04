@@ -1,4 +1,5 @@
 const colors = require("colors");
+const htmlspecialchars = require("htmlspecialchars");
 
 const SocketClass = require("./classes/Socket.js");
 const VideoClass = require("./classes/Video.js");

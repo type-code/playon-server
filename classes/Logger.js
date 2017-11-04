@@ -16,6 +16,38 @@ class Logger {
 		Logger.log(`<< Disconnect\tNick: ${nick}`.red);
 	}
 
+	static EventMessage(nick, text) {
+		Logger.log(`<< Message\tNick: ${nick}\tMessage: `.yellow + `${text}`.white);
+	}
+
+	static EventLoad(video, nick) {
+		Logger.log(`## New Video\tID: ${video}\tNick: ${nick}`.magenta)
+	}
+
+	static EventPlay(nick, time) {
+		Logger.log(`## Play \tTime: ${time}\tNick: ${nick}`.cyan);
+	}
+
+	static EventPause(nick, time) {
+		Logger.log(`## Pause \tTime: ${time}\tNick: ${nick}`.cyan);
+	}
+
+	static EventRewind(nick, old_time, new_time) {
+		Logger.log(`## Rewind\tNick: ${nick}\tFrom: ${old_time} s.\tTo: ${new_time} s.`.yellow);
+	}
+
+	static EventTick(video, time) {
+		Logger.log(`## Playlog\tTime: ${time}\tVideo: ${video}`.gray);
+	}
+
+	static EventSync(video, time) {
+		Logger.log(`## Sync:\tTime: ${time}\tVideo: ${video}`.gray);
+	}
+
+	static EventAutopause(time) {
+		Logger.log(`>> Auto Pause\tTime: ${time}`.red);
+	}
+
 
 	
 	static log(text) {
