@@ -2,11 +2,11 @@ const colors = require("colors");
 const htmlspecialchars = require("htmlspecialchars");
 
 const SocketClass = require("./classes/Socket.js");
-const VideoClass = require("./classes/Video.js");
 
-var Video = new VideoClass();
-var Socket = new SocketClass(Video);
-
+var Socket = new SocketClass();
 
 Socket.create();
 Socket.events();
+
+Socket.room_create("default", "1YTLvqZNW_4");
+Socket.room_create("android", "Pw_dLa5ti5Q");

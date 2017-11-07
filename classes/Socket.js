@@ -1,4 +1,5 @@
 const Controller = require("./Controller.js");
+const VideoClass = require("./Video.js");
 const Logger = require("./Logger.js");
 
 const io = require("socket.io");
@@ -9,7 +10,7 @@ class Socket extends Controller {
 	constructor(Video) {
 		super();
 
-		this.video = Video;
+		this.rooms = [];
 		this.port = 8080;
 		this.io = null;
 	}
@@ -17,10 +18,16 @@ class Socket extends Controller {
 	create() {
 		this.io = io(this.port);
 		this.io.use(middleware);
-		this.video.io = this.io;
+		//this.video.io = this.io;
 
 		Logger.ServerStarted(this.port);
 		return this.io;
+	}
+
+	room_create(room_name, video_id) {
+		var room = new VideoClass(video_id, room_name);
+		this.rooms[room_name] = room;
+		this.rooms[room_name].io = this.io;
 	}
 
 	events(socket) {
@@ -34,6 +41,9 @@ class Socket extends Controller {
 			this.event_play(socket);
 			this.event_pause(socket);
 			this.event_rewind(socket);
+			this.event_click(socket);
+			this.event_rename(socket);
+			this.event_any_event(socket);
 		});
 
 		Logger.EventsLoaded();
@@ -42,12 +52,12 @@ class Socket extends Controller {
 	event_connect(socket) {
 		socket.ip = socket.conn.remoteAddress.replace("::ffff:", "");
 
-		socket.emit("connected", {
+		/*socket.emit("connected", {
 			video: this.video.video, 
 			time: this.video.time, 
 			play: this.video.play, 
 			light: this.video.light
-		});
+		});*/
 	}
 
 	event_disconnect(socket) {
@@ -62,58 +72,72 @@ class Socket extends Controller {
 
 	event_join(socket) {
 		socket.on("join", (data) => {
-			socket.nick = data.nick;
-			socket.room = "default";
-			socket.join(socket.room);
+			if (this.rooms[data.room]) {
+				socket.nick = data.nick;
+				socket.room = data.room;
+				socket.join(data.room);
 
-			this.io.sockets.in(socket.room).emit("join", {
-				nick: data.nick,
-				type: "join"
-			});
+				socket.emit("joined", {
+					video: this.rooms[data.room].video, 
+					time: this.rooms[data.room].time, 
+					play: this.rooms[data.room].play, 
+					light: this.rooms[data.room].light
+				});
 
-			Logger.EventJoin(socket.nick, socket.ip);
+				this.io.sockets.in(socket.room).emit("join", {
+					nick: data.nick,
+					type: "join"
+				});
+
+				Logger.EventJoin(socket.nick, socket.ip);
+			}
+			else {
+				socket.emit("error_message", {
+					message: "Room not found!"
+				});
+			}
 		});
 	}
 
 	event_load(socket) {
 		socket.on("load", (data) => {
-			var link = this.video.parse(data.link, data.playlist);
-			this.video.video = link;
-			this.video.play = false;
-			this.video.time = 0;
+			var link = this.rooms[socket.room].parse(data.link, data.playlist);
+			this.rooms[socket.room].video = link;
+			this.rooms[socket.room].play = false;
+			this.rooms[socket.room].time = 0;
 
 			this.io.sockets.emit("load", {
-				video: this.video.video,
+				video: this.rooms[socket.room].video,
 				nick: socket.nick
 			});
 
-			Logger.EventLoad(this.video.video, socket.nick);
+			Logger.EventLoad(this.rooms[socket.room].video, socket.nick);
 		});
 	}
 
 	event_play(socket) {
 		socket.on("play", (data) => {
-			if (this.video.play == false) {
+			if (this.rooms[socket.room].play == false) {
 				this.io.sockets.in(socket.room).emit("play", {
-					video: this.video.video, 
-					time: this.video.time, 
+					video: this.rooms[socket.room].video, 
+					time: this.rooms[socket.room].time, 
 					nick: socket.nick
 				});
-				this.video.play = true;
-				Logger.EventPlay(socket.nick, this.video.time);
+				this.rooms[socket.room].play = true;
+				Logger.EventPlay(socket.nick, this.rooms[socket.room].time);
 			}
 		});
 	}
 
 	event_pause(socket) {
 		socket.on("pause", (data) => {
-			if (this.video.play == true) {
+			if (this.rooms[socket.room].play == true) {
 				this.io.sockets.in(socket.room).emit("pause", {
-					time: this.video.time, 
+					time: this.rooms[socket.room].time, 
 					nick: socket.nick
 				});
-				this.video.play = false;
-				Logger.EventPause(socket.nick, this.video.time);
+				this.rooms[socket.room].play = false;
+				Logger.EventPause(socket.nick, this.rooms[socket.room].time);
 			}
 		});
 	}
@@ -121,7 +145,7 @@ class Socket extends Controller {
 	event_message(socket) {
 		socket.on("message", (data) => {
 			data.text = this.html(data.text);
-			data.nick = socket.nick;
+			data.nick = this.check_nick(socket.nick);
 			this.io.sockets.in(socket.room).emit("message", data);
 			Logger.EventMessage(socket.nick, data.text);
 		});
@@ -130,11 +154,11 @@ class Socket extends Controller {
 	event_rewind(socket) {
 		socket.on("rewind", (data) => {
 			var new_time = Math.floor(data.time);
-			Logger.EventRewind(socket.nick, this.video.time, new_time);
+			Logger.EventRewind(socket.nick, this.rooms[socket.room].time, new_time);
 
-			this.video.time = new_time;
+			this.rooms[socket.room].time = new_time;
 			this.io.sockets.in(socket.room).emit("rewind", {
-				time: this.video.time, 
+				time: this.rooms[socket.room].time, 
 				nick: socket.nick,
 				type: "rewind"
 			});
@@ -143,8 +167,30 @@ class Socket extends Controller {
 
 	event_light(socket) {
 		socket.on("light", (data) => {
-			this.video.light = !this.video.light;
-			this.io.sockets.in(socket.room).emit("light", {light: this.video.light});
+			this.rooms[socket.room].light = !this.rooms[socket.room].light;
+			this.io.sockets.in(socket.room).emit("light", {light: this.rooms[socket.room].light});
+		});
+	}
+
+	event_click(socket) {
+		socket.on("click", (data) => {
+			this.io.sockets.in(socket.room).emit("click", data);
+		});
+	}
+
+	event_rename(socket) {
+		socket.on("rename", function(data){
+			data.new_nick = this.check_nick(data.new_nick);
+			socket.nick = data.new_nick;
+			data.type = "rename";
+
+			this.io.sockets.in(socket.room).emit("rename", data);
+		});
+	}
+
+	event_any_event(socket) {
+		socket.on("*", (event, data) => {
+			//this.rooms[socket.room].auto_stop = 0;
 		});
 	}
 }

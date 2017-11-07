@@ -25,23 +25,23 @@ class Logger {
 	}
 
 	static EventPlay(nick, time) {
-		Logger.log(`## Play \tTime: ${time}\tNick: ${nick}`.cyan);
+		Logger.log(`## Play \tTime: ${time} \tNick: ${nick}`.cyan);
 	}
 
 	static EventPause(nick, time) {
-		Logger.log(`## Pause \tTime: ${time}\tNick: ${nick}`.cyan);
+		Logger.log(`## Pause \tTime: ${time} \tNick: ${nick}`.cyan);
 	}
 
 	static EventRewind(nick, old_time, new_time) {
-		Logger.log(`## Rewind\tNick: ${nick}\tFrom: ${old_time} s.\tTo: ${new_time} s.`.yellow);
+		Logger.log(`## Rewind\tNick: ${nick}\tFrom: ${old_time} \tTo: ${new_time}`.yellow);
 	}
 
 	static EventTick(video, time) {
-		Logger.log(`## Playlog\tTime: ${time}\tVideo: ${video}`.gray);
+		Logger.log(`## Playing\tTime: ${time} \tVideo: ${video}`.gray);
 	}
 
 	static EventSync(video, time) {
-		Logger.log(`## Sync:\tTime: ${time}\tVideo: ${video}`.gray);
+		Logger.log(`## Sync:\tTime: ${time} \tVideo: ${video}`.gray);
 	}
 
 	static EventAutopause(time) {

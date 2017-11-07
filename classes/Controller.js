@@ -33,6 +33,14 @@ class Controller {
 	html(text) {
 		return htmlspecialchars(text);
 	}
+
+	check_nick(nick) {
+		if (nick.length > 11) 
+			nick = nick.substr(0, 11);
+		nick = html(nick);
+
+		return nick;
+	}
 }
 
 module.exports = Controller;
