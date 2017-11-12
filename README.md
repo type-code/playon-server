@@ -4,10 +4,13 @@ The server is written on the NodeJS engine in the Javascipt language.
 
 The connection to the server takes place using the multi-platform library **Socket.io**, which was built on the **WebSocket** technology.
 
+## How to start connection on client:
+After client success connect to server socket, he must send [join](#event-join-to-server) event to server with him userdata. If server success compute this request, and connect user to room, he emit [joined](#event-joined-from-server) with room & video data. After that, the server and the client can communicate with any other events.
+
 
 ## Server-side eventlist:
-- [Connect](#event-connect-from-server) - User connect to server
-- [Join](#event-join-from-server) - Any user join to player
+- [Join](#event-join-from-server) - Any user connect to server
+- [Joined](#event-joined-from-server) - User connected to socket and send his data
 - [Disc](#event-disc-from-server) - Any user disconnect from server
 - [Sync](#event-sync-from-server) - Server synchronize event
 - [Play](#event-play-from-server) - Any user play video
@@ -17,6 +20,7 @@ The connection to the server takes place using the multi-platform library **Sock
 - [Message](#event-message-from-server) - Any user send chat message
 - [Light](#event-light-from-server) - Any user change light on player
 - [Click](#event-click-from-server) - Any user click on video
+- [Error Message](#event-error_message-from-server) - Emit on any error from server-side
 
 
 ## Client-side eventlist:
@@ -33,8 +37,19 @@ The connection to the server takes place using the multi-platform library **Sock
 
 All data from server receive on **JSON-Object** format, not **JSON-String**.
 
-## <br>Event ``connect`` from server
-Receive from the server with a successful connection to it.
+## <br>Event ``join`` from server
+Receive from the server if new user connected to player room.
+
+#### Response data:
+
+```javascript
+{
+	nick: "NICKNAME",
+}
+```
+
+## <br>Event ``joined`` from server
+Receive from the server if current user success joined to room and server.
 
 #### Response data:
 
@@ -47,23 +62,13 @@ Receive from the server with a successful connection to it.
 }
 ```
 
+**video** - Video ID (Example: `YVcroDDi24s`)
 **time** - is Integer value of video current time play in **seconds**<br>
 **play** - is Boolean value of video playing status<br>
 **light** - is Boolean value of player light on (true) or off (false)
 
-## <br>Event ``join`` from server
-Receive from the server if new user connected to player.
-
-#### Response data:
-
-```javascript
-{
-	nick: "NICKNAME",
-}
-```
-
 ## <br>Event ``disc`` from server
-Receive from the server on user disconnect.
+Receive from the server on user disconnect from room or server.
 
 #### Response data:
 
@@ -176,6 +181,17 @@ Receive from the server, if any user click on video.
 **x** and **y** - is percent value (0 - 100)<br>
 **color** - user main color and mark color
 
+## <br>Event ``error_message`` from server
+Receive from the server, on any server-side error.
+
+#### Receive data: 
+```javascript
+{
+	type: "TYPE_ERROR",
+	message: "MESSAGE_ERROR"
+}
+```
+
 
 <br><br><br><br>
 
@@ -185,16 +201,18 @@ Receive from the server, if any user click on video.
 All data to server need send on **JSON-Object** format, not **JSON-String**.
 
 ## <br>Event ``join`` to server
-Send to the server with a successful connection to it.
+Send to the server with a successful connection to it (After init socket and on event `connect`).
 
 #### Input data:
 
 ```javascript
 {
-	nick: "NICKNAME"
+	nick: "NICKNAME",
+	room: "ROOMNAME"
 }
 ```
 
+If server successfully compute you data he emit back ["joined" event](#event-joined-from-server), else server emit to you ["error_message" event](#event-error_message-from-server)<br>
 If server receive this event, he emit ["join" event](#event-join-from-server) to all users
 
 ## <br>Event ``play`` to server

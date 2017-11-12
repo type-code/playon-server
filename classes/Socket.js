@@ -1,4 +1,4 @@
-var VideoClass = require("./Video.js");
+var RoomClass = require("./Room.js");
 var io = require("socket.io");
 var middleware = require("socketio-wildcard")();
 
@@ -29,7 +29,7 @@ class Socket extends Controller {
 	 * @param {string} video_id 
 	 */
 	room_create(room_name, video_id) {
-		var room = new VideoClass(video_id, room_name);
+		var room = new RoomClass(video_id, room_name);
 		this.rooms[room_name] = room;
 		this.rooms[room_name].io = this.io;
 	}
@@ -92,6 +92,7 @@ class Socket extends Controller {
 			}
 			else {
 				socket.emit("error_message", {
+					type: "Room",
 					message: "Room not found!"
 				});
 			}

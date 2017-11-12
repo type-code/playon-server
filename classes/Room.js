@@ -1,6 +1,6 @@
 var url = require("url");
 
-class Video extends Controller {
+class Room extends Controller {
 	constructor(video_id, room_name) {
 		super();
 
@@ -67,4 +67,4 @@ class Video extends Controller {
 	}
 }
 
-module.exports = Video;
+module.exports = Room;
