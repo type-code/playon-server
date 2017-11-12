@@ -1,6 +1,9 @@
 const colors = require("colors");
 const htmlspecialchars = require("htmlspecialchars");
 
+global.config = require("../config.json");
+global.Logger = require("./Logger.js");
+global.Controller = require("./classes/Controller.js");
 const SocketClass = require("./classes/Socket.js");
 
 var Socket = new SocketClass();

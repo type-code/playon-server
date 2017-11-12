@@ -1,4 +1,4 @@
-const htmlspecialchars = require("htmlspecialchars");
+var htmlspecialchars = require("htmlspecialchars");
 
 class Controller {
 	constructor() {
@@ -37,7 +37,7 @@ class Controller {
 	check_nick(nick) {
 		if (nick.length > 11) 
 			nick = nick.substr(0, 11);
-		nick = html(nick);
+		nick = this.html(nick);
 
 		return nick;
 	}

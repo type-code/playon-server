@@ -1,7 +1,4 @@
-const Controller = require("./Controller.js");
-const Logger = require("./Logger.js");
-const url = require("url");
-
+var url = require("url");
 
 class Video extends Controller {
 	constructor(video_id, room_name) {
@@ -21,7 +18,7 @@ class Video extends Controller {
 	parse(link, playlist) {
 		if (playlist == false) {
 			var temp = url.parse(link, true);
-			
+
 			if (temp.query.v) {
 				link = temp.query.v;
 			}
@@ -45,7 +42,7 @@ class Video extends Controller {
 						video: this.video.video,
 						time: this.video.time
 					});
-					//Logger.EventSync(this.video, this.time);
+					// Logger.EventSync(this.video, this.time);
 				}
 				Logger.EventTick(this.video, this.time);
 			}
@@ -56,10 +53,16 @@ class Video extends Controller {
 			this.auto_stop = 0;
 			this.play = false;
 			this.io.sockets.in(this.room).emit("pause", {
-				time: this.time, 
+				time: this.time,
 				nick: "SERVER"
 			});
 			Logger.EventAutopause(this.time);
+		}
+	}
+
+	auto_cancel() {
+		if (this.play == true) {
+			this.auto_stop = 0;
 		}
 	}
 }

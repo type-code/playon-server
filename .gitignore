@@ -1,4 +1,13 @@
-node_modules
+/node_modules/
+/server/
+/.vscode
+*.code-workspace
+*.sublime-workspace
+*.sublime-project
+*.log
+sftp-config.json
+package-lock.json
+config.json
 package-lock.json
 playlist.json
 jokes.json

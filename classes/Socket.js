@@ -1,13 +1,9 @@
-const Controller = require("./Controller.js");
-const VideoClass = require("./Video.js");
-const Logger = require("./Logger.js");
-
-const io = require("socket.io");
-const middleware = require("socketio-wildcard")();
-
+var VideoClass = require("./Video.js");
+var io = require("socket.io");
+var middleware = require("socketio-wildcard")();
 
 class Socket extends Controller {
-	constructor(Video) {
+	constructor() {
 		super();
 
 		this.rooms = [];
@@ -15,6 +11,9 @@ class Socket extends Controller {
 		this.io = null;
 	}
 
+	/**
+	 * Return the Socket.IO server object
+	 */
 	create() {
 		this.io = io(this.port);
 		this.io.use(middleware);
@@ -24,6 +23,11 @@ class Socket extends Controller {
 		return this.io;
 	}
 
+	/**
+	 * Creating room in socket
+	 * @param {string} room_name 
+	 * @param {string} video_id 
+	 */
 	room_create(room_name, video_id) {
 		var room = new VideoClass(video_id, room_name);
 		this.rooms[room_name] = room;
@@ -37,6 +41,7 @@ class Socket extends Controller {
 			this.event_join(socket);
 			this.event_load(socket);
 			this.event_message(socket);
+			this.event_message_image(socket);
 			this.event_light(socket);
 			this.event_play(socket);
 			this.event_pause(socket);
@@ -51,42 +56,36 @@ class Socket extends Controller {
 
 	event_connect(socket) {
 		socket.ip = socket.conn.remoteAddress.replace("::ffff:", "");
-
-		/*socket.emit("connected", {
-			video: this.video.video, 
-			time: this.video.time, 
-			play: this.video.play, 
-			light: this.video.light
-		});*/
 	}
 
 	event_disconnect(socket) {
 		socket.on("disconnect", () => {
-			Logger.EventDisconnect(socket.nick);
 			this.io.sockets.in(socket.room).emit("disc", {
-				nick: socket.nick,
-				type: "disc"
+				nick: socket.nick
 			});
+			Logger.EventDisconnect(socket.nick);
 		});
 	}
 
 	event_join(socket) {
 		socket.on("join", (data) => {
 			if (this.rooms[data.room]) {
+				if (socket.room) 
+				socket.leave(socket.room);
+
 				socket.nick = data.nick;
 				socket.room = data.room;
 				socket.join(data.room);
 
 				socket.emit("joined", {
-					video: this.rooms[data.room].video, 
-					time: this.rooms[data.room].time, 
-					play: this.rooms[data.room].play, 
+					video: this.rooms[data.room].video,
+					time: this.rooms[data.room].time,
+					play: this.rooms[data.room].play,
 					light: this.rooms[data.room].light
 				});
 
 				this.io.sockets.in(socket.room).emit("join", {
 					nick: data.nick,
-					type: "join"
 				});
 
 				Logger.EventJoin(socket.nick, socket.ip);
@@ -119,8 +118,8 @@ class Socket extends Controller {
 		socket.on("play", (data) => {
 			if (this.rooms[socket.room].play == false) {
 				this.io.sockets.in(socket.room).emit("play", {
-					video: this.rooms[socket.room].video, 
-					time: this.rooms[socket.room].time, 
+					video: this.rooms[socket.room].video,
+					time: this.rooms[socket.room].time,
 					nick: socket.nick
 				});
 				this.rooms[socket.room].play = true;
@@ -133,7 +132,7 @@ class Socket extends Controller {
 		socket.on("pause", (data) => {
 			if (this.rooms[socket.room].play == true) {
 				this.io.sockets.in(socket.room).emit("pause", {
-					time: this.rooms[socket.room].time, 
+					time: this.rooms[socket.room].time,
 					nick: socket.nick
 				});
 				this.rooms[socket.room].play = false;
@@ -146,8 +145,16 @@ class Socket extends Controller {
 		socket.on("message", (data) => {
 			data.text = this.html(data.text);
 			data.nick = this.check_nick(socket.nick);
+			if (data.text.length > 150) data.text = data.text.substr(0, 150);
 			this.io.sockets.in(socket.room).emit("message", data);
 			Logger.EventMessage(socket.nick, data.text);
+		});
+	}
+
+	event_message_image(socket) {
+		socket.on("message_image", (data) => {
+			data.nick = socket.nick;
+			this.io.sockets.in(socket.room).emit("message_image", data);
 		});
 	}
 
@@ -158,9 +165,8 @@ class Socket extends Controller {
 
 			this.rooms[socket.room].time = new_time;
 			this.io.sockets.in(socket.room).emit("rewind", {
-				time: this.rooms[socket.room].time, 
-				nick: socket.nick,
-				type: "rewind"
+				time: this.rooms[socket.room].time,
+				nick: socket.nick
 			});
 		});
 	}
@@ -168,7 +174,7 @@ class Socket extends Controller {
 	event_light(socket) {
 		socket.on("light", (data) => {
 			this.rooms[socket.room].light = !this.rooms[socket.room].light;
-			this.io.sockets.in(socket.room).emit("light", {light: this.rooms[socket.room].light});
+			this.io.sockets.in(socket.room).emit("light", { light: this.rooms[socket.room].light });
 		});
 	}
 
@@ -179,10 +185,9 @@ class Socket extends Controller {
 	}
 
 	event_rename(socket) {
-		socket.on("rename", function(data){
+		socket.on("rename", (data) => {
 			data.new_nick = this.check_nick(data.new_nick);
 			socket.nick = data.new_nick;
-			data.type = "rename";
 
 			this.io.sockets.in(socket.room).emit("rename", data);
 		});
@@ -190,7 +195,9 @@ class Socket extends Controller {
 
 	event_any_event(socket) {
 		socket.on("*", (event, data) => {
-			//this.rooms[socket.room].auto_stop = 0;
+			if (this.rooms[socket.room]) {
+				this.rooms[socket.room].auto_cancel();
+			}
 		});
 	}
 }
