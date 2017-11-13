@@ -39,6 +39,7 @@ class Socket extends Controller {
 			this.event_connect(socket);
 			this.event_disconnect(socket);
 			this.event_join(socket);
+			this.event_focus_toggle(socket);
 			this.event_load(socket);
 			this.event_message(socket);
 			this.event_message_image(socket);
@@ -75,13 +76,25 @@ class Socket extends Controller {
 
 				socket.nick = data.nick;
 				socket.room = data.room;
+				socket.focus = true;
 				socket.join(data.room);
+
+				var sockets = this.io.sockets.in(socket.room).sockets;
+				var users_array = [];
+
+				for(var id in sockets) {
+					users_array.push({
+						nick: sockets[id].nick,
+						focus: sockets[id].focus
+					});
+				};
 
 				socket.emit("joined", {
 					video: this.rooms[data.room].video,
 					time: this.rooms[data.room].time,
 					play: this.rooms[data.room].play,
-					light: this.rooms[data.room].light
+					light: this.rooms[data.room].light,
+					users: users_array
 				});
 
 				this.io.sockets.in(socket.room).emit("join", {
@@ -96,6 +109,14 @@ class Socket extends Controller {
 					message: "Room not found!"
 				});
 			}
+		});
+	}
+
+	event_focus_toggle(socket) {
+		socket.on("focus_toggle", (data) => {
+			data.nick = socket.nick;
+			socket.focus = data.focus;
+			this.io.sockets.in(socket.room).emit("focus_toggle", data);
 		});
 	}
 
