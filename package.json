@@ -2,10 +2,10 @@
   "name": "patyplay-socket",
   "version": "1.0.0",
   "description": "PatyPlay - Socket.io Server",
-  "main": "socket.js",
+  "main": "core.js",
   "scripts": {
-    "test": "node socket.js",
-    "run": "cls & node socket.js"
+    "test": "node core.js",
+    "run": "cls & node core.js"
   },
   "repository": {
     "type": "git",

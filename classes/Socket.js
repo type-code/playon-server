@@ -9,11 +9,11 @@ class Socket extends Controller {
 		this.rooms = [];
 		this.port = 8080;
 		this.io = null;
+		this.db = null;
+
+		setInterval(() => this.database_refresh(), 10000);
 	}
 
-	/**
-	 * Return the Socket.IO server object
-	 */
 	create() {
 		this.io = io(this.port);
 		this.io.use(middleware);
@@ -23,19 +23,28 @@ class Socket extends Controller {
 		return this.io;
 	}
 
+	database_refresh() {
+		for(var a in this.rooms) {
+			if (this.rooms[a].changed)
+				this.db.room_refresh(this.rooms[a]);
+		}
+	}
+
 	/**
 	 * Creating room in socket
 	 * @param {string} room_name 
 	 * @param {string} video_id 
 	 */
 	room_create(room_name, video_id) {
-		var room = new RoomClass(video_id, room_name);
+		var room = new RoomClass(room_name, video_id);
 		this.rooms[room_name] = room;
 		this.rooms[room_name].io = this.io;
 	}
 
 	events(socket) {
 		this.io.sockets.on("connection", (socket) => {
+			this.event_connector(socket);
+
 			this.event_connect(socket);
 			this.event_disconnect(socket);
 			this.event_join(socket);
@@ -55,22 +64,52 @@ class Socket extends Controller {
 		Logger.EventsLoaded();
 	}
 
+	event_connector(socket) {
+		socket.on("system", (data) => {
+			if (data.socket_token == config.socket_token) {
+				Logger.EventExpress();
+				socket.join("system");
+			}
+		});
+
+		socket.on("room_create", (data) => {
+			if (data.socket_token == config.socket_token) {
+				this.room_create(data.name, data.video);
+			}
+		});
+	}
+
 	event_connect(socket) {
 		socket.ip = socket.conn.remoteAddress.replace("::ffff:", "");
 	}
 
 	event_disconnect(socket) {
 		socket.on("disconnect", () => {
-			this.io.sockets.in(socket.room).emit("disc", {
-				nick: socket.nick
-			});
-			Logger.EventDisconnect(socket.nick);
+			if (socket.room) {
+				delete this.rooms[socket.room].users[socket.nick];
+				this.rooms[socket.room].users.length--;
+				this.rooms[socket.room].changed = true;
+				
+				this.io.sockets.in(socket.room).emit("disc", {
+					nick: socket.nick
+				});
+
+				Logger.EventDisconnect(socket.nick);
+			}
 		});
 	}
 
 	event_join(socket) {
 		socket.on("join", (data) => {
 			if (this.rooms[data.room]) {
+				if (this.rooms[data.room].users[data.nick]) {
+					socket.emit("error_message", {
+						type: "Room",
+						message: "You already connected to this room!"
+					});
+					return false;
+				}
+
 				if (socket.room) 
 				socket.leave(socket.room);
 
@@ -79,13 +118,17 @@ class Socket extends Controller {
 				socket.focus = true;
 				socket.join(data.room);
 
-				var sockets = this.io.sockets.in(socket.room).sockets;
+				this.rooms[socket.room].changed = true;
+				this.rooms[socket.room].users.length++;
+				this.rooms[socket.room].users[socket.nick] = (socket);
+
+				var users = this.rooms[socket.room].users;
 				var users_array = [];
 
-				for(var id in sockets) {
+				for(var id in users) {
 					users_array.push({
-						nick: sockets[id].nick,
-						focus: sockets[id].focus
+						nick: users[id].nick,
+						focus: users[id].focus
 					});
 				};
 
@@ -123,6 +166,7 @@ class Socket extends Controller {
 	event_load(socket) {
 		socket.on("load", (data) => {
 			var link = this.rooms[socket.room].parse(data.link, data.playlist);
+			this.rooms[socket.room].changed = true;
 			this.rooms[socket.room].video = link;
 			this.rooms[socket.room].play = false;
 			this.rooms[socket.room].time = 0;

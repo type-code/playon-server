@@ -1,7 +1,7 @@
 var url = require("url");
 
 class Room extends Controller {
-	constructor(video_id, room_name) {
+	constructor(room_name, video_id) {
 		super();
 
 		this.io = null;
@@ -11,6 +11,8 @@ class Room extends Controller {
 		this.play = false;
 		this.auto_stop = 0;
 		this.room = room_name;
+		this.users = [];
+		this.changed = false;
 
 		setInterval(() => this.watcher(), 1000);
 	}

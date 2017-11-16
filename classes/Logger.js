@@ -10,11 +10,23 @@ class Logger {
 
 	static ServerStarted(port) {
 		console.log("\n\n\n");
-		Logger.log(`## Socket Started! [${port}]`, "green");
+		Logger.log(`## Socket\tStarted! [${port}]`, "green");
 	}
 
 	static EventsLoaded() {
-		Logger.log(`## Events loaded!`, "green");
+		Logger.log(`## Events\tLoaded!`, "green");
+	}
+
+	static EventExpress() {
+		Logger.log(`## Express\tConnected!`, "green");
+	}
+
+	static DatabaseTrue() {
+		Logger.log(`## Database\tSuccess!`, "green");
+	}
+
+	static DatabaseFalse() {
+		Logger.log(`## Database\tFailed!`, "red");
 	}
 
 	static EventJoin(nick, ip) {
@@ -22,7 +34,7 @@ class Logger {
 	}
 
 	static EventDisconnect(nick) {
-		Logger.log(`<< Disconnect\tNick: ${nick}`, "red");
+		Logger.log(`<< Disconn\tNick: ${nick}`, "red");
 	}
 
 	static EventMessage(nick, text) {
@@ -30,7 +42,7 @@ class Logger {
 	}
 
 	static EventLoad(video, nick) {
-		Logger.log(`## New Video\tID: ${video}\tNick: ${nick}`, "magenta")
+		Logger.log(`## Video\tID: ${video}\tNick: ${nick}`, "magenta")
 	}
 
 	static EventPlay(nick, time) {
@@ -50,16 +62,16 @@ class Logger {
 	}
 
 	static EventSync(video, time) {
-		Logger.log(`## Sync:\tTime: ${time} \tVideo: ${video}`, "gray");
+		Logger.log(`## Sync\tTime: ${time} \tVideo: ${video}`, "gray");
 	}
 
 	static EventAutopause(time) {
-		Logger.log(`>> Auto Pause\tTime: ${time}`, "red");
+		Logger.log(`>> AutoStop\tTime: ${time}`, "red");
 	}
 
 
 	
-	static log(text, color) {
+	static log(text, color = "gray") {
 		var time = Logger.consoleTime();
 		console.log(`${time} | `.gray + `${text}`[color]);
 

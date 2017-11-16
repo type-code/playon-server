@@ -5,11 +5,11 @@ global.config = require("../config.json");
 global.Logger = require("./classes/Logger.js");
 global.Controller = require("./classes/Controller.js");
 const SocketClass = require("./classes/Socket.js");
+const DatabaseClass = require("./classes/Database.js");
 
 var Socket = new SocketClass();
+var Database = new DatabaseClass();
 
 Socket.create();
 Socket.events();
-
-Socket.room_create("default", "1YTLvqZNW_4");
-Socket.room_create("android", "Pw_dLa5ti5Q");
+Database.connect(Socket);
