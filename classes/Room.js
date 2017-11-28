@@ -41,24 +41,24 @@ class Room extends Controller {
 			if (this.time % 60 == 0) {
 				if (this.time % 120 == 0) {
 					this.io.sockets.in(this.room).emit("sync", {
-						video: this.video.video,
-						time: this.video.time
+						video: this.video,
+						time: this.time
 					});
 					// Logger.EventSync(this.video, this.time);
 				}
-				Logger.EventTick(this.video, this.time);
+				Logger.EventTick(this.video, this.time, this.room);
 			}
 		}
 
 
-		if (this.auto_stop >= 9000) {
+		if (this.auto_stop >= 900) {
 			this.auto_stop = 0;
 			this.play = false;
 			this.io.sockets.in(this.room).emit("pause", {
 				time: this.time,
 				nick: "SERVER"
 			});
-			Logger.EventAutopause(this.time);
+			Logger.EventAutopause(this.time, this.room);
 		}
 	}
 

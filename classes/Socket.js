@@ -101,6 +101,8 @@ class Socket extends Controller {
 
 	event_join(socket) {
 		socket.on("join", (data) => {
+			if (!data.roon) data.room = "default";
+
 			if (this.rooms[data.room]) {
 				if (this.rooms[data.room].users[data.nick]) {
 					socket.emit("error_message", {
@@ -120,7 +122,7 @@ class Socket extends Controller {
 
 				this.rooms[socket.room].changed = true;
 				this.rooms[socket.room].users.length++;
-				this.rooms[socket.room].users[socket.nick] = (socket);
+				this.rooms[socket.room].users[socket.nick] = socket;
 
 				var users = this.rooms[socket.room].users;
 				var users_array = [];
@@ -144,7 +146,7 @@ class Socket extends Controller {
 					nick: data.nick,
 				});
 
-				Logger.EventJoin(socket.nick, socket.ip);
+				Logger.EventJoin(socket.nick, socket.room, socket.ip);
 			}
 			else {
 				socket.emit("error_message", {
@@ -176,7 +178,7 @@ class Socket extends Controller {
 				nick: socket.nick
 			});
 
-			Logger.EventLoad(this.rooms[socket.room].video, socket.nick);
+			Logger.EventLoad(this.rooms[socket.room].video, socket.nick, socket.room);
 		});
 	}
 
@@ -213,7 +215,7 @@ class Socket extends Controller {
 			data.nick = this.check_nick(socket.nick);
 			if (data.text.length > 150) data.text = data.text.substr(0, 150);
 			this.io.sockets.in(socket.room).emit("message", data);
-			Logger.EventMessage(socket.nick, data.text);
+			Logger.EventMessage(socket.nick, socket.room, data.text);
 		});
 	}
 
@@ -252,6 +254,8 @@ class Socket extends Controller {
 
 	event_rename(socket) {
 		socket.on("rename", (data) => {
+			delete this.rooms[socket.room].users[socket.nick];
+			this.rooms[socket.room].users[data.new_nick] = socket;
 			data.new_nick = this.check_nick(data.new_nick);
 			socket.nick = data.new_nick;
 

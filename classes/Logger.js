@@ -29,20 +29,20 @@ class Logger {
 		Logger.log(`## Database\tFailed!`, "red");
 	}
 
-	static EventJoin(nick, ip) {
-		Logger.log(`>> Connect\tNick: ${nick} \tIP: ${ip}`, "cyan");
+	static EventJoin(nick, room, ip) {
+		Logger.log(`>> Connect\tRoom: ${room}\tNick: ${nick} \tIP: ${ip}`, "cyan");
 	}
 
 	static EventDisconnect(nick) {
 		Logger.log(`<< Disconn\tNick: ${nick}`, "red");
 	}
 
-	static EventMessage(nick, text) {
-		Logger.log(`<< Message\tNick: ${nick}\tMessage: ${text}`, "yellow");
+	static EventMessage(nick, room, text) {
+		Logger.log(`<< Message\tRoom: ${room}\tNick: ${nick}\tMessage: ${text}`, "yellow");
 	}
 
-	static EventLoad(video, nick) {
-		Logger.log(`## Video\tID: ${video}\tNick: ${nick}`, "magenta")
+	static EventLoad(video, nick, room) {
+		Logger.log(`## Video\tRoom: ${room}\tID: ${video}\tNick: ${nick}`, "magenta")
 	}
 
 	static EventPlay(nick, time) {
@@ -57,16 +57,16 @@ class Logger {
 		Logger.log(`## Rewind\tNick: ${nick}\tFrom: ${old_time} \tTo: ${new_time}`, "yellow");
 	}
 
-	static EventTick(video, time) {
-		Logger.log(`## Playing\tTime: ${time} \tVideo: ${video}`, "gray");
+	static EventTick(video, time, room) {
+		Logger.log(`## Playing\tRoom: ${room}\tTime: ${time} \tVideo: ${video}`, "gray");
 	}
 
 	static EventSync(video, time) {
 		Logger.log(`## Sync\tTime: ${time} \tVideo: ${video}`, "gray");
 	}
 
-	static EventAutopause(time) {
-		Logger.log(`>> AutoStop\tTime: ${time}`, "red");
+	static EventAutopause(time, room) {
+		Logger.log(`>> AutoStop\tTime: ${time}\tRoom: ${room}`, "red");
 	}
 
 
