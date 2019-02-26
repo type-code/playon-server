@@ -5,7 +5,7 @@
   "main": "core.js",
   "scripts": {
     "test": "node core.js",
-    "run": "cls & node core.js"
+    "run": "screen -mdS socket node core.js"
   },
   "repository": {
     "type": "git",

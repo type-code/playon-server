@@ -33,8 +33,8 @@ class Logger {
 		Logger.log(`>> Connect\tRoom: ${room}\tNick: ${nick} \tIP: ${ip}`, "cyan");
 	}
 
-	static EventDisconnect(nick) {
-		Logger.log(`<< Disconn\tNick: ${nick}`, "red");
+	static EventDisconnect(nick, ip) {
+		Logger.log(`<< Disconn\tNick: ${nick}\tIP: ${ip}`, "red");
 	}
 
 	static EventMessage(nick, room, text) {
@@ -69,6 +69,10 @@ class Logger {
 		Logger.log(`>> AutoStop\tTime: ${time}\tRoom: ${room}`, "red");
 	}
 
+	static EventRename(new_nick, old_nick) {
+		Logger.log(`## Remame\tOldNick: ${old_nick}\tNewNick: ${new_nick}\tRoom: ${room}`, "red");
+	}
+
 
 	
 	static log(text, color = "gray") {
@@ -81,7 +85,7 @@ class Logger {
 
 	static consoleTime() {
 		var date = new Date();
-			date.setHours(date.getHours() + global.config.utc_diff);
+			// date.setHours(date.getHours() + global.config.utc_diff);
 		var day = date.getDate();
 		var month = date.getMonth();
 		var year = date.getFullYear();
@@ -100,6 +104,18 @@ class Logger {
 
 	static zeroAdd(numb) {
 		return (numb > 9 ? numb : "0" + numb);
+	}
+
+	static ErrorHandler(e) {
+		var error_file = fs.createWriteStream("../logs/errors.log", {
+			flags: 'a',
+			encoding: 'utf8'
+		});
+
+		error_file.write(e);
+		error_file.write("\n\n\n");
+		error_file.close();
+		process.exit(0);
 	}
 }
 

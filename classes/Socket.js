@@ -94,14 +94,14 @@ class Socket extends Controller {
 					nick: socket.nick
 				});
 
-				Logger.EventDisconnect(socket.nick);
+				Logger.EventDisconnect(socket.nick, socket.ip);
 			}
 		});
 	}
 
 	event_join(socket) {
 		socket.on("join", (data) => {
-			if (!data.roon) data.room = "default";
+			if (!data.room) data.room = "default";
 
 			if (this.rooms[data.room]) {
 				if (this.rooms[data.room].users[data.nick]) {
@@ -254,10 +254,12 @@ class Socket extends Controller {
 
 	event_rename(socket) {
 		socket.on("rename", (data) => {
+			Logger.EventRename(socket.nick, data.new_nick);
 			delete this.rooms[socket.room].users[socket.nick];
-			this.rooms[socket.room].users[data.new_nick] = socket;
 			data.new_nick = this.check_nick(data.new_nick);
+			data.old_nick = socket.nick;
 			socket.nick = data.new_nick;
+			this.rooms[socket.room].users[data.new_nick] = socket;
 
 			this.io.sockets.in(socket.room).emit("rename", data);
 		});
