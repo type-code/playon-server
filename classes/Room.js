@@ -39,13 +39,11 @@ class Room extends Controller {
 			this.auto_stop++;
 
 			if (this.time % 60 == 0) {
-				if (this.time % 120 == 0) {
-					this.io.sockets.in(this.room).emit("sync", {
-						video: this.video,
-						time: this.time
-					});
-					// Logger.EventSync(this.video, this.time);
-				}
+				this.io.sockets.in(this.room).emit("sync", {
+					video: this.video,
+					time: this.time
+				});
+				
 				Logger.EventTick(this.video, this.time, this.room);
 			}
 		}
