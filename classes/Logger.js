@@ -69,8 +69,8 @@ class Logger {
 		Logger.log(`>> AutoStop\tTime: ${time}\tRoom: ${room}`, "red");
 	}
 
-	static EventRename(new_nick, old_nick) {
-		Logger.log(`## Remame\tOldNick: ${old_nick}\tNewNick: ${new_nick}\tRoom: ${room}`, "red");
+	static EventRename(room, new_nick, old_nick) {
+		Logger.log(`## Remame\tRoom: ${room}\tOldNick: ${old_nick}\tNewNick: ${new_nick}`, "red");
 	}
 
 

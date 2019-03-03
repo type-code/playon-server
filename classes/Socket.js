@@ -254,7 +254,7 @@ class Socket extends Controller {
 
 	event_rename(socket) {
 		socket.on("rename", (data) => {
-			Logger.EventRename(socket.nick, data.new_nick);
+			Logger.EventRename(socket.room, socket.nick, data.new_nick);
 			delete this.rooms[socket.room].users[socket.nick];
 			data.new_nick = this.check_nick(data.new_nick);
 			data.old_nick = socket.nick;
