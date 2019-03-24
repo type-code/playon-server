@@ -102,6 +102,7 @@ class Socket extends Controller {
 	event_join(socket) {
 		socket.on("join", (data) => {
 			if (!data.room) data.room = "default";
+			if (data.nick.length > 11) data.nick = "Я ДАУН";//data.nick.substr(0, 11);
 
 			if (this.rooms[data.room]) {
 				if (this.rooms[data.room].users[data.nick]) {
@@ -139,7 +140,8 @@ class Socket extends Controller {
 					time: this.rooms[data.room].time,
 					play: this.rooms[data.room].play,
 					light: this.rooms[data.room].light,
-					users: users_array
+					users: users_array,
+					nick: data.nick
 				});
 
 				this.io.sockets.in(socket.room).emit("join", {
