@@ -102,7 +102,7 @@ class Socket extends Controller {
 	event_join(socket) {
 		socket.on("join", (data) => {
 			if (!data.room) data.room = "default";
-			if (data.nick.length > 11) data.nick = "Я ДАУН";//data.nick.substr(0, 11);
+			if (data.nick.length > 11) data.nick = "Я ДАУН"; //data.nick.substr(0, 11);
 
 			if (this.rooms[data.room]) {
 				if (this.rooms[data.room].users[data.nick]) {
