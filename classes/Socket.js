@@ -103,6 +103,7 @@ class Socket extends Controller {
 		socket.on("join", (data) => {
 			if (!data.room) data.room = "default";
 			if (data.nick.length > 11) data.nick = "Я ДАУН"; //data.nick.substr(0, 11);
+			if (!isNaN(data.nick.charAt(0))) data.nick = "N" + data.nick;
 
 			if (this.rooms[data.room]) {
 				if (this.rooms[data.room].users[data.nick]) {
