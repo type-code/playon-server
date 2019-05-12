@@ -14,7 +14,6 @@ Socket.create();
 Socket.events();
 Database.connect(Socket);
 
-
-process.on("uncaughtException", Logger.ErrorHandler);
-process.on("unhandledRejection", Logger.ErrorHandler);
-process.on("exit", Logger.ErrorHandler);
+// process.on("uncaughtException", Logger.ErrorHandler);
+// process.on("unhandledRejection", Logger.ErrorHandler);
+// process.on("exit", Logger.ErrorHandler);

@@ -7,7 +7,6 @@ if (config.production)
 	});
 
 class Logger {
-
 	static ServerStarted(port) {
 		console.log("\n\n\n");
 		Logger.log(`## Socket\tStarted! [${port}]`, "green");
@@ -107,15 +106,15 @@ class Logger {
 	}
 
 	static ErrorHandler(e) {
-		var error_file = fs.createWriteStream("../logs/errors.log", {
-			flags: 'a',
-			encoding: 'utf8'
-		});
+		// var error_file = fs.createWriteStream("../logs/errors.log", {
+		// 	flags: 'a',
+		// 	encoding: 'utf8'
+		// });
 
-		error_file.write(e);
-		error_file.write("\n\n\n");
-		error_file.close();
-		process.exit(0);
+		// error_file.write(e);
+		// error_file.write("\n\n\n");
+		// error_file.close();
+		// process.exit(0);
 	}
 }
 
