@@ -10,7 +10,7 @@ class Database {
         var name = config.db_name;
 
         this.db = null;
-        this.url = `mongodb://${user}:${pass}@${host}:${port}/${name}`;
+        this.url = `mongodb://${host}:${port}/${name}`;
         this.ObjectID = ObjectID;
     }
 
@@ -22,7 +22,7 @@ class Database {
             this.db = db;
             Socket.db = this;
             
-            db.collection("rooms").find({}).toArray((e, rooms) => {
+            db.collection("oldrooms").find({}).toArray((e, rooms) => {
                 for(var a in rooms) {
                     Socket.room_create(rooms[a].name, rooms[a].video);
                 }
@@ -31,7 +31,7 @@ class Database {
     }
 
     room_refresh(room) {
-        this.db.collection("rooms").update({name: room.room}, {
+        this.db.collection("oldrooms").update({name: room.room}, {
             $set: {
                 video: room.video,
                 users: room.users.length
